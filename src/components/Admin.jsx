@@ -15,7 +15,7 @@ const Admin = () => {
   const [experiences, setExperiences] = useState([]);
   const [newExperience, setNewExperience] = useState({ company: '', position: '', period: '', responsibilities: '' });
   const [projects, setProjects] = useState([]);
-  const [newProject, setNewProject] = useState({ title: '', description: '', technologies: '', responsibilities: '', image: null });
+  const [newProject, setNewProject] = useState({ title: '', description: '', technologies: '', responsibilities: '', image: null,demoUrl: '' });
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -177,7 +177,7 @@ const Admin = () => {
           image: imageUrl
         };
         await addDoc(collection(db, 'projects'), projectData);
-        setNewProject({ title: '', description: '', technologies: '', responsibilities: '', image: null });
+        setNewProject({ title: '', description: '', technologies: '', responsibilities: '', image: null, demoUrl:'' });
         fetchProjects();
         toast.success('Project added successfully');
       } catch (error) {
@@ -545,6 +545,17 @@ const Admin = () => {
                   className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
                 />
               </div>
+              <div>
+                <label htmlFor="demoUrl" className="block text-gray-300 mb-2 text-sm font-medium">Demo Url</label>
+              <input
+                  type="url"
+                  id="demoUrl"
+                  name="demoUrl"
+                  value={newProject.demoUrl}
+                  onChange={handleProjectChange}
+                  className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+                />
+                </div>
               <div>
                 <label htmlFor="description" className="block text-gray-300 mb-2 text-sm font-medium">Description</label>
                 <textarea

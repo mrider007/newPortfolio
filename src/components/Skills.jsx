@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Image, Transformation } from 'cloudinary-react';
 import toast from 'react-hot-toast';
 import { Plus, X } from 'lucide-react';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
 const SkillItem = React.memo(({ skill, isEditing, onDelete }) => {
   return (
@@ -80,26 +81,14 @@ const Skills = () => {
     if (newSkill.name && newSkill.image) {
       try {
         setLoading(true);
-        const formData = new FormData();
-        formData.append('file', newSkill.image);
-        formData.append('upload_preset', 'your_upload_preset');
-
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-          {
-            method: 'POST',
-            body: formData,
-          }
-        );
-
-        const data = await response.json();
+      const imageUrl = await uploadToCloudinary(newSkill.image);
 
         const docRef = await addDoc(collection(db, 'skills'), {
           name: newSkill.name,
-          image: data.public_id,
+          image: imageUrl,
         });
 
-        setSkills([...skills, { id: docRef.id, name: newSkill.name, image: data.public_id }]);
+        setSkills([...skills, { id: docRef.id, name: newSkill.name, image: imageUrl }]);
         setNewSkill({ name: '', image: null });
         toast.success("Skill added successfully");
       } catch (error) {

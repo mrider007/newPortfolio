@@ -6,6 +6,7 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import ProjectCard from './ProjectCard';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
 const fallbackProjects = [
   {
@@ -26,11 +27,11 @@ const fallbackProjects = [
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [newProject, setNewProject] = useState({ 
-    title: '', 
-    description: '', 
-    technologies: '', 
-    image: null, 
+  const [newProject, setNewProject] = useState({
+    title: '',
+    description: '',
+    technologies: '',
+    image: null,
     responsibilities: '',
     demoUrl: ''
   });
@@ -63,21 +64,7 @@ const Projects = () => {
     if (newProject.title && newProject.description && newProject.technologies) {
       try {
         setLoading(true);
-        let imageUrl = '';
-        if (newProject.image) {
-          const formData = new FormData();
-          formData.append('file', newProject.image);
-          formData.append('upload_preset', 'your_upload_preset');
-
-          const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-          );
-
-          const data = await response.json();
-          imageUrl = data.public_id;
-        }
-
+        const imageUrl = await uploadToCloudinary(newProject.image);
         const projectData = {
           title: newProject.title,
           description: newProject.description,
@@ -97,6 +84,8 @@ const Projects = () => {
         toast.error("Failed to add project");
       } finally {
         setLoading(false);
+        await fetchProjects()
+
       }
     }
   };
@@ -112,6 +101,7 @@ const Projects = () => {
       toast.error("Failed to delete project");
     } finally {
       setLoading(false);
+      await fetchProjects()
     }
   };
 

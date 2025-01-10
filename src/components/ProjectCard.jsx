@@ -25,7 +25,7 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
       <motion.div className="w-full h-48 sm:h-56 md:h-64 bg-gray-700 relative">
         {project.image ? (
           <img
-            src={`https://res.cloudinary.com/${import.meta.env.VITE_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${project.image}.jpg`}
+            src={project.image}
             alt={project.title}
             className="object-cover w-full h-full transition-all duration-300"
           />
