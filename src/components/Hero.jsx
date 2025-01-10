@@ -1,31 +1,18 @@
 import { motion } from 'framer-motion';
 import { CalendarIcon, Download } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent } from '@radix-ui/react-dialog';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from './ui/button';
 
-const Button = ({ onClick, children, variant = 'primary' }) => (
-  <motion.button
-    onClick={onClick}
-    className={`px-8 py-6 rounded-full font-medium flex items-center gap-2 ${
-      variant === 'primary'
-        ? 'bg-[#00E5FF] text-black hover:bg-[#00E5FF]/90'
-        : 'border-[#00E5FF] text-[#00E5FF] hover:bg-[#00E5FF]/10 border'
-    }`}
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-  >
-    {children}
-  </motion.button>
-);
-
+const fallbackSkills = [
+  { id: 'fallback1', name: 'React', image: 'https://w7.pngwing.com/pngs/831/155/png-transparent-game-react-native-javascript-android-physics-symmetry-web-application-vuejs-thumbnail.png' },
+  { id: 'fallback2', name: 'Node.js', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE4qaVzeEg9j60I9z2eR77MY6ilKM9l1J82A&s' },
+  { id: 'fallback3', name: 'MongoDB', image: 'https://www.liblogo.com/img-logo/mo429m311-mongodb-logo-mongodb-logo-.png' },
+];
 export default function Hero() {
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [skills, setSkills] = useState([]);
   const [heroData, setHeroData] = useState({
     name: 'Mukesh Kumar Singh',
     title: 'Full Stack Developer',
@@ -35,6 +22,19 @@ export default function Hero() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
+
+  const fetchSkills = useCallback(async () => {
+    try {
+      const skillsSnapshot = await getDocs(collection(db, 'skills'));
+      const fetchedSkills = skillsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setSkills(fetchedSkills.length > 0 ? fetchedSkills : fallbackSkills);
+    } catch (error) {
+      console.error("Error fetching skills:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchHeroData = async () => {
@@ -52,6 +52,10 @@ export default function Hero() {
     fetchHeroData();
   }, []);
 
+  useEffect(() => {
+    fetchSkills();
+  }, [fetchSkills]);
+
   const handleSave = async () => {
     try {
       await setDoc(doc(db, 'personalInfo', 'main'), heroData);
@@ -62,7 +66,7 @@ export default function Hero() {
   };
 
   const handleDownloadCV = () => {
-    const cvUrl = heroData ? heroData?.cvLink: '/mukesh-kumar-singh-cv.pdf';
+    const cvUrl = heroData ? heroData?.cvLink : '/mukesh-kumar-singh-cv.pdf';
     const link = document.createElement('a');
     link.href = cvUrl;
     link.download = 'Mukesh-Kumar-Singh-CV.pdf';
@@ -89,9 +93,10 @@ export default function Hero() {
     },
   };
 
+
   return (
     <motion.div
-      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500/10 to-purple-500/10 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500/10 to-purple-500/10 relative overflow-hidden z-0"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -102,7 +107,7 @@ export default function Hero() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       />
-      <div className="relative z-10 text-center px-4 max-w-4xl w-full">
+      <div className="relative z-10 text-center px-4 max-w-4xl w-full" id='ignore-bubble'>
         {loading ? (
           <motion.p
             className="text-white text-2xl"
@@ -164,15 +169,15 @@ export default function Hero() {
               <>
                 <motion.div
                   variants={itemVariants}
-                  className="text-sm md:text-base text-[#00E5FF] tracking-wider mb-4"
+                  className="text-lg md:text-base text-[#00E5FF] tracking-wider mb-4"
                 >
-                  {heroData.title || 'FULL STACK DEVELOPER'}
+                  {heroData?.title || 'FULL STACK DEVELOPER'}
                 </motion.div>
                 <motion.h1
                   className="text-4xl md:text-7xl font-bold text-white mb-6"
                   variants={itemVariants}
                 >
-                  {heroData.name || 'Mukesh Kumar Singh'}
+                  {heroData?.name || 'Mukesh Kumar Singh'}
                 </motion.h1>
                 <motion.p
                   className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8"
@@ -185,10 +190,16 @@ export default function Hero() {
                   className="flex flex-wrap justify-center gap-4"
                   variants={itemVariants}
                 >
-                  {/* <Button onClick={() => setShowCalendar(true)}>
-                    <CalendarIcon className="h-5 w-5" />
-                    Book a Call
-                  </Button> */}
+                  <a
+                    href="/#contact"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-[#00E5FF] transition-colors duration-300 block flex items-center"
+                  >
+                    <Button variant="outline">
+                      <CalendarIcon className="h-5 w-5" />
+                      Shedule A meeting
+                    </Button>
+                  </a>
                   <Button onClick={handleDownloadCV} variant="outline">
                     <Download className="h-5 w-5" />
                     Download CV
@@ -200,58 +211,48 @@ export default function Hero() {
         )}
       </div>
 
-      <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="fixed inset-0 flex items-center justify-center">
-          <motion.div
-            className="bg-[#1a1f2e] text-white p-6 rounded-lg shadow-lg max-w-md w-full"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-2xl font-semibold text-[#00E5FF] mb-4">
-              Schedule a Call
-            </h2>
-            <Calendar
-              onChange={setSelectedDate}
-              value={selectedDate}
-              className="w-full rounded-lg overflow-hidden"
-            />
-            {selectedDate && (
-              <p className="mt-4 text-[#00E5FF]">
-                Selected Date: {selectedDate.toLocaleDateString()}
-              </p>
-            )}
-            <Button onClick={() => setShowCalendar(false)} className="mt-6 w-full justify-center">
-              Confirm Booking
-            </Button>
-          </motion.div>
-        </DialogContent>
-      </Dialog>
+      {/* Animated Skill Bubbles */}
+      {skills && skills.map((skill, index) => (
+  <motion.div
+    key={skill.id}
+    initial={{ boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)' }}
+    className="absolute w-16 h-16 rounded-full bg-white shadow-lg overflow-hidden z-9"
+    style={{
+      top: `${10 + Math.random() * 60}vh`, 
+      left: `${10 + Math.random() * 60}vw`,
+      opacity: 0.3,
+    }}
+    animate={{
+      x: [
+        0, 
+        Math.random() * window.innerWidth * 0.3 - (window.innerWidth * 0.15), 
+        0
+      ],
+      y: [
+        0,
+        Math.random() * window.innerHeight * 0.3 - (window.innerHeight * 0.15), 
+        0
+      ],
+      rotate: [0, 360, 0], 
+    }}
+    transition={{
+      duration: 6 + index * 0.5,
+      repeat: Infinity, 
+      repeatType: 'mirror',
+      delay: index * 0.4, 
+      ease: 'easeInOut',
+    }}
+  >
+    <img
+      src={skill.image || '/fallback-image.png'}
+      alt={skill.name || 'Skill'}
+      className="w-full h-full object-contain"
+    />
+  </motion.div>
+))}
 
-      <motion.div
-        className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-[#00E5FF]/20 blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.2, 0.3],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-        }}
-      />
-      <motion.div
-        className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full bg-blue-500/20 blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.2, 0.3, 0.2],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          delay: 1,
-        }}
-      />
+
+
     </motion.div>
   );
 }

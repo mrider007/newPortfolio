@@ -16,6 +16,9 @@ const SkillItem = React.memo(({ skill, isEditing, onDelete }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
       transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02, y: 10,
+        boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)',
+        transition: { type: 'spring', stiffness: 300, damping: 20 }}}
       className="relative group bg-gray-800 rounded-xl p-6 flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
     >
       {/* Neon glow effect */}
@@ -29,7 +32,7 @@ const SkillItem = React.memo(({ skill, isEditing, onDelete }) => {
         >
           <Transformation width="80" height="80" crop="fit" />
         </Image>
-        <p className="mt-2 text-center text-white font-semibold group-hover:text-blue-300 transition-colors duration-300">{skill.name}</p>
+        <p className="mt-2 text-center text-white font-semibold group-hover:text-blue-300 transition-colors duration-200">{skill.name}</p>
       </div>
       
       {isEditing && (

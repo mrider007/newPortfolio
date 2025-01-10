@@ -89,7 +89,9 @@ const Experience = () => {
             <motion.div
               key={exp.id}
               variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -10,
+                boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)',
+                transition: { type: 'spring', stiffness: 300, damping: 20 }}}
               className="relative bg-gray-800 rounded-xl p-6 shadow-xl overflow-hidden group"
             >
               {/* Neon glow effect */}

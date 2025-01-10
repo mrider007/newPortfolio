@@ -8,6 +8,7 @@ import emailjs from 'emailjs-com';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useRef } from 'react';
+import { Button } from './ui/button';
 
 const Contact = () => {
   const { user } = useAuth();
@@ -149,7 +150,7 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <motion.div initial={{ boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)' }} className="bg-gray-800 p-6 rounded-lg shadow-lg">
               <h3
                 id="schedule-meeting-heading"
                 className="text-2xl font-semibold text-blue-300 mb-4"
@@ -226,14 +227,10 @@ const Contact = () => {
                   calendarClassName="custom-datepicker" // Custom class for datepicker
                 />
               </div>
-
-              <button
-                onClick={handleMeetingScheduled}
-                className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white rounded mt-4"
-              >
-                Schedule Meeting
-              </button>
-            </div>
+              <Button onClick={handleMeetingScheduled} className='mx-auto' variant="outline">
+              Schedule Meeting
+              </Button>
+            </motion.div>
           </div>
         )}
       </div>

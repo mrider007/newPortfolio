@@ -68,6 +68,7 @@ const Header = () => {
     <motion.header
       initial="hidden"
       animate="visible"
+      id="header"
       variants={headerVariants}
       className={`fixed w-full z-50 transition-all duration-300 ${
         isScrolled ? "bg-[#020817] shadow-lg" : "bg-transparent"
