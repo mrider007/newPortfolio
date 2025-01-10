@@ -62,7 +62,7 @@ export default function Hero() {
   };
 
   const handleDownloadCV = () => {
-    const cvUrl = '/mukesh-kumar-singh-cv.pdf';
+    const cvUrl = heroData ? heroData?.cvLink: '/mukesh-kumar-singh-cv.pdf';
     const link = document.createElement('a');
     link.href = cvUrl;
     link.download = 'Mukesh-Kumar-Singh-CV.pdf';

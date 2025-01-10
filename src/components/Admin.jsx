@@ -1,24 +1,21 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { uploadToCloudinary } from '../utils/cloudinary';
-import Skills from './Skills';
 
 const Admin = () => {
-  const [personalInfo, setPersonalInfo] = useState({ name: '', title: '', email: '', phone: '', location: '' });
+  const [personalInfo, setPersonalInfo] = useState({ name: '', title: '', email: '', phone: '', location: '', cvLink: '' });
   const [skills, setSkills] = useState([]);
-  const [newSkill, setNewSkill] = useState('');
+  const [newSkill, setNewSkill] = useState({ name: '', image: null });
   const [experiences, setExperiences] = useState([]);
   const [newExperience, setNewExperience] = useState({ company: '', position: '', period: '', responsibilities: '' });
   const [projects, setProjects] = useState([]);
-  const [newProject, setNewProject] = useState({ title: '', description: '', technologies: '' });
-  const [skillImage, setSkillImage] = useState(null);
-  const [projectImage, setProjectImage] = useState(null);
+  const [newProject, setNewProject] = useState({ title: '', description: '', technologies: '', responsibilities: '', image: null });
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -57,28 +54,10 @@ const Admin = () => {
     setProjects(projectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
-  const validateInputs = (email, password) => {
-    if (!email || !password) {
-      toast.error('Both email and password are required');
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error('Invalid email format');
-      return false;
-    }
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
-      return false;
-    }
-    return true;
-  };
-
   const handleSignIn = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
-
-    if (!validateInputs(email, password)) return;
 
     try {
       await signIn(email, password);
@@ -97,28 +76,53 @@ const Admin = () => {
 
   const handlePersonalInfoSubmit = async (e) => {
     e.preventDefault();
-    await setDoc(doc(db, 'personalInfo', 'main'), personalInfo);
-    alert('Personal information updated successfully!');
+    try {
+      await setDoc(doc(db, 'personalInfo', 'main'), personalInfo);
+      toast.success('Personal information updated successfully!');
+    } catch (error) {
+      console.error('Error updating personal info:', error);
+      toast.error('Failed to update personal information');
+    }
+  };
+
+  const handleSkillChange = (e) => {
+    const { name, value, files } = e.target;
+    setNewSkill(prev => ({
+      ...prev,
+      [name]: name === 'image' ? files[0] : value
+    }));
   };
 
   const handleAddSkill = async (e) => {
     e.preventDefault();
-    if (newSkill.trim() && skillImage) {
-      // const imageUrl = await uploadToCloudinary(skillImage);
-      await addDoc(collection(db, 'skills'), {
-        name: newSkill.trim(),
-        image: imageUrl // Save the Cloudinary URL in Firebase
-      });
-      setNewSkill('');
-      setSkillImage(null); // Reset the image input
-      fetchSkills();
+    if (newSkill.name.trim() && newSkill.image) {
+      try {
+        const imageUrl = await uploadToCloudinary(newSkill.image);
+        await addDoc(collection(db, 'skills'), {
+          name: newSkill.name.trim(),
+          image: imageUrl
+        });
+        setNewSkill({ name: '', image: null });
+        fetchSkills();
+        toast.success('Skill added successfully');
+      } catch (error) {
+        console.error('Error adding skill:', error);
+        toast.error('Failed to add skill');
+      }
+    } else {
+      toast.error('Please provide both skill name and image');
     }
   };
 
-
   const handleDeleteSkill = async (id) => {
-    await deleteDoc(doc(db, 'skills', id));
-    fetchSkills();
+    try {
+      await deleteDoc(doc(db, 'skills', id));
+      fetchSkills();
+      toast.success('Skill deleted successfully');
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      toast.error('Failed to delete skill');
+    }
   };
 
   const handleExperienceChange = (e) => {
@@ -128,44 +132,72 @@ const Admin = () => {
 
   const handleExperienceSubmit = async (e) => {
     e.preventDefault();
-    await addDoc(collection(db, 'experiences'), {
-      ...newExperience,
-      responsibilities: newExperience.responsibilities.split('\n').filter(r => r.trim())
-    });
-    setNewExperience({ company: '', position: '', period: '', responsibilities: '' });
-    fetchExperiences();
+    try {
+      await addDoc(collection(db, 'experiences'), {
+        ...newExperience,
+        responsibilities: newExperience.responsibilities.split('\n').filter(r => r.trim())
+      });
+      setNewExperience({ company: '', position: '', period: '', responsibilities: '' });
+      fetchExperiences();
+      toast.success('Experience added successfully');
+    } catch (error) {
+      console.error('Error adding experience:', error);
+      toast.error('Failed to add experience');
+    }
   };
 
   const handleDeleteExperience = async (id) => {
-    await deleteDoc(doc(db, 'experiences', id));
-    fetchExperiences();
+    try {
+      await deleteDoc(doc(db, 'experiences', id));
+      fetchExperiences();
+      toast.success('Experience deleted successfully');
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      toast.error('Failed to delete experience');
+    }
   };
 
   const handleProjectChange = (e) => {
-    const { name, value } = e.target;
-    setNewProject(prev => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    setNewProject(prev => ({
+      ...prev,
+      [name]: name === 'image' ? files[0] : value
+    }));
   };
 
   const handleProjectSubmit = async (e) => {
     e.preventDefault();
-    if (newProject.title.trim() && projectImage) {
-      // const imageUrl = await uploadToCloudinary(projectImage);
-      const projectData = {
-        ...newProject,
-        technologies: newProject.technologies.split(',').map(tech => tech.trim()),
-        image: imageUrl
-      };
-      await addDoc(collection(db, 'projects'), projectData);
-      setNewProject({ title: '', description: '', technologies: '' });
-      setProjectImage(null);
-      fetchProjects();
+    if (newProject.title.trim() && newProject.image) {
+      try {
+        const imageUrl = await uploadToCloudinary(newProject.image);
+        const projectData = {
+          ...newProject,
+          technologies: newProject.technologies.split(',').map(tech => tech.trim()),
+          responsibilities: newProject.responsibilities.split('\n').filter(r => r.trim()),
+          image: imageUrl
+        };
+        await addDoc(collection(db, 'projects'), projectData);
+        setNewProject({ title: '', description: '', technologies: '', responsibilities: '', image: null });
+        fetchProjects();
+        toast.success('Project added successfully');
+      } catch (error) {
+        console.error('Error adding project:', error);
+        toast.error('Failed to add project');
+      }
+    } else {
+      toast.error('Please provide project title and image');
     }
   };
 
-
   const handleProjectDelete = async (id) => {
-    await deleteDoc(doc(db, 'projects', id));
-    fetchProjects();
+    try {
+      await deleteDoc(doc(db, 'projects', id));
+      fetchProjects();
+      toast.success('Project deleted successfully');
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast.error('Failed to delete project');
+    }
   };
 
   if (!user) {
@@ -292,13 +324,25 @@ const Admin = () => {
                   className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label htmlFor="location" className="block text-gray-300 mb-2 text-sm font-medium">Location</label>
                 <input
                   type="text"
                   id="location"
                   name="location"
                   value={personalInfo.location}
+                  onChange={handlePersonalInfoChange}
+                  required
+                  className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+                />
+              </div>
+              <div>
+                <label htmlFor="cvLink" className="block text-gray-300 mb-2 text-sm font-medium">CV Google Drive Link</label>
+                <input
+                  type="url"
+                  id="cvLink"
+                  name="cvLink"
+                  value={personalInfo.cvLink}
                   onChange={handlePersonalInfoChange}
                   required
                   className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
@@ -326,22 +370,25 @@ const Admin = () => {
         >
           <h2 className="text-2xl font-bold mb-6 text-blue-400">Skills</h2>
           <form onSubmit={handleAddSkill} className="mb-6">
-            <div className="flex">
-              {/* <input
-                type="file"
-                onChange={(e) => setSkillImage(e.target.files[0])}
-                className="mt-4 px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              /> */}
+            <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="text"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
+                name="name"
+                value={newSkill.name}
+                onChange={handleSkillChange}
                 placeholder="Add a new skill"
-                className="flex-grow px-4 py-2 text-gray-300 bg-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+                className="flex-grow px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+              />
+              <input
+                type="file"
+                name="image"
+                onChange={handleSkillChange}
+                className="px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                accept="image/*"
               />
               <motion.button
                 type="submit"
-                className="bg-blue-500 text-white py-2 px-4 rounded-r-lg hover:bg-blue-600 transition-colors duration-200 flex items-center"
+                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -350,23 +397,23 @@ const Admin = () => {
               </motion.button>
             </div>
           </form>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {skills.map(skill => (
               <motion.div
                 key={skill.id}
-                className="bg-gray-700 rounded-full px-3 py-1 flex items-center"
+                className="bg-gray-700 rounded-lg p-4 flex items-center justify-between"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="text-gray-300">{skill.name}</span>
-              {/* {
-              skill&& skill?.image && <img src={skill.image} alt={skill.name} className="w-20 h-20 object-cover rounded-full" />
-              }  */}
+                <div className="flex items-center">
+                  {skill.image && <img src={skill.image} alt={skill.name} className="w-10 h-10 object-cover rounded-full mr-3" />}
+                  <span className="text-gray-300">{skill.name}</span>
+                </div>
                 <motion.button
                   onClick={() => handleDeleteSkill(skill.id)}
-                  className="ml-2 text-red-500 hover:text-red-600"
+                  className="text-red-500 hover:text-red-600"
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.8 }}
                 >
@@ -486,11 +533,6 @@ const Admin = () => {
           <h2 className="text-2xl font-bold mb-6 text-blue-400">Projects</h2>
           <form onSubmit={handleProjectSubmit} className="mb-6">
             <div className="grid grid-cols-1 gap-6">
-              {/* <input
-                type="file"
-                onChange={(e) => setProjectImage(e.target.files[0])}
-                className="mt-4 px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              /> */}
               <div>
                 <label htmlFor="title" className="block text-gray-300 mb-2 text-sm font-medium">Title</label>
                 <input
@@ -527,6 +569,29 @@ const Admin = () => {
                   className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
                 />
               </div>
+              <div>
+                <label htmlFor="responsibilities" className="block text-gray-300 mb-2 text-sm font-medium">Responsibilities (one per line)</label>
+                <textarea
+                  id="responsibilities"
+                  name="responsibilities"
+                  value={newProject.responsibilities}
+                  onChange={handleProjectChange}
+                  required
+                  rows="4"
+                  className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+                ></textarea>
+              </div>
+              <div>
+                <label htmlFor="projectImage" className="block text-gray-300 mb-2 text-sm font-medium">Project Image</label>
+                <input
+                  type="file"
+                  id="projectImage"
+                  name="image"
+                  onChange={handleProjectChange}
+                  className="w-full px-4 py-2 text-gray-300 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+                  accept="image/*"
+                />
+              </div>
             </div>
             <motion.button
               type="submit"
@@ -547,15 +612,21 @@ const Admin = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {/* {
-              project&& project?.image && <img src={project.image} alt={project.name} className="w-20 h-20 object-cover rounded-full" />
-              }  */}
+              {project.image && <img src={project.image} alt={project.title} className="w-full h-48 object-cover rounded-lg mb-4" />}
               <h3 className="text-xl font-semibold text-blue-300">{project.title}</h3>
               <p className="text-gray-300 mb-2">{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.technologies.map((tech, i) => (
                   <span key={i} className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">{tech}</span>
                 ))}
+              </div>
+              <div className="mb-4">
+                <h4 className="text-lg font-semibold text-blue-300 mb-2">Responsibilities:</h4>
+                <ul className="list-disc list-inside text-gray-300">
+                  {project.responsibilities.map((resp, index) => (
+                    <li key={index}>{resp}</li>
+                  ))}
+                </ul>
               </div>
               <motion.button
                 onClick={() => handleProjectDelete(project.id)}

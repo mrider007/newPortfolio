@@ -10,6 +10,7 @@ import Contact from './components/Contact';
 import Admin from './components/Admin';
 import { AuthProvider } from './contexts/AuthContext';
 
+
 function App() {
   return (
     <AuthProvider>
