@@ -169,7 +169,6 @@ const Header = () => {
       </nav>
 
       {/* Mobile Menu */}
-      {/* Mobile Menu */}
 <AnimatePresence>
   {isMobileMenuOpen && (
     <motion.div
