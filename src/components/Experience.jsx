@@ -82,7 +82,7 @@ const Experience = () => {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  Exprience
+                  Experience
                 </motion.h2>
         <div className="space-y-8">
           {experiences.map((exp, index) => (
