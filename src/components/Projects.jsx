@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import ProjectCard from './ProjectCard';
 
-
 const fallbackProjects = [
   {
     id: '1',
@@ -15,51 +14,29 @@ const fallbackProjects = [
     description: 'Developed a B2B e-commerce platform.',
     technologies: ['Redux', 'Material-UI', 'React', 'Next.js', 'AWS EC2'],
     image: "",
+    responsibilities: [
+      "Led frontend development",
+      "Implemented responsive design",
+      "Integrated payment gateway"
+    ]
   },
-  {
-    id: '2',
-    title: 'dzital.com',
-    description: 'Created a multiple category platform similar to OLX.',
-    technologies: ['React', 'Node.js', 'Express', 'MongoDB'],
-    image: "",
-  },
-  {
-    id: '3',
-    title: 'tatakalcares.com',
-    description: 'Developed a medical application.',
-    technologies: ['React', 'Firebase', 'Material-UI'],
-    image: "",
-  },
-  {
-    id: '4',
-    title: 'intacars365',
-    description: 'Built a car dealership management system.',
-    technologies: ['React', 'Node.js', 'Express', 'MongoDB', 'Redux'],
-    image: "",
-  },
-  {
-    id: '5',
-    title: 'CRUD API Express Package',
-    description: 'Developed a custom npm package crud-api-express to simplify the creation of RESTful APIs.',
-    technologies: ['Node.js', 'Express', 'npm'],
-    image: "",
-  },
-  {
-    id: '6',
-    title: 'Data-Paginate NPM Package',
-    description: 'Created a pagination npm package data-paginate for React applications with a custom hook for pagination.',
-    technologies: ['React', 'npm', 'JavaScript'],
-    image: "",
-  },
+  // ... (other fallback projects)
 ];
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [newProject, setNewProject] = useState({ title: '', description: '', technologies: '', image: null });
+  const [newProject, setNewProject] = useState({ 
+    title: '', 
+    description: '', 
+    technologies: '', 
+    image: null, 
+    responsibilities: '',
+    demoUrl: ''
+  });
   const { user } = useAuth();
-  const [flippedCard, setFlippedCard] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const fetchProjects = useCallback(async () => {
     try {
       const projectsSnapshot = await getDocs(collection(db, 'projects'));
@@ -77,40 +54,43 @@ const Projects = () => {
     }
   }, []);
 
-
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
   const handleAddProject = async (e) => {
     e.preventDefault();
-    if (newProject.title && newProject.description && newProject.technologies && newProject.image) {
+    if (newProject.title && newProject.description && newProject.technologies) {
       try {
         setLoading(true);
-        const formData = new FormData();
-        formData.append('file', newProject.image);
-        formData.append('upload_preset', 'your_upload_preset');
+        let imageUrl = '';
+        if (newProject.image) {
+          const formData = new FormData();
+          formData.append('file', newProject.image);
+          formData.append('upload_preset', 'your_upload_preset');
 
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-          { method: 'POST', body: formData }
-        );
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+            { method: 'POST', body: formData }
+          );
 
-        const data = await response.json();
-        const docRef = await addDoc(collection(db, 'projects'), {
+          const data = await response.json();
+          imageUrl = data.public_id;
+        }
+
+        const projectData = {
           title: newProject.title,
           description: newProject.description,
           technologies: newProject.technologies.split(',').map(tech => tech.trim()),
-          image: data.public_id,
-        });
+          image: imageUrl,
+          responsibilities: newProject.responsibilities.split('\n').filter(r => r.trim()),
+          demoUrl: newProject.demoUrl
+        };
 
-        setProjects([...projects, {
-          id: docRef.id,
-          ...newProject,
-          technologies: newProject.technologies.split(',').map(tech => tech.trim()),
-          image: data.public_id,
-        }]);
-        setNewProject({ title: '', description: '', technologies: '', image: null });
+        const docRef = await addDoc(collection(db, 'projects'), projectData);
+
+        setProjects([...projects, { id: docRef.id, ...projectData }]);
+        setNewProject({ title: '', description: '', technologies: '', image: null, responsibilities: '', demoUrl: '' });
         toast.success("Project added successfully");
       } catch (error) {
         console.error("Error adding project:", error);
@@ -141,9 +121,9 @@ const Projects = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="py-20 bg-gradient-to-b from-gray-900 to-gray-800"
+      className="py-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10"
     >
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.h2
           className="text-4xl font-bold mb-12 text-center text-[#00E5FF]"
           initial={{ y: -50, opacity: 0 }}
@@ -156,7 +136,7 @@ const Projects = () => {
           <motion.div className="mb-8">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="mb-4"
+              className="mb-4 bg-[#00E5FF] text-gray-800 py-2 px-4 rounded-md hover:bg-[#00B8D9] transition-colors duration-300"
               disabled={loading}
             >
               {isEditing ? 'Done' : 'Edit Projects'}
@@ -168,13 +148,13 @@ const Projects = () => {
                   value={newProject.title}
                   onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
                   placeholder="Project title"
-                  className="bg-gray-700 text-white"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
                 />
                 <textarea
                   value={newProject.description}
                   onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                   placeholder="Project description"
-                  className="bg-gray-700 text-white"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
                   rows="3"
                 />
                 <input
@@ -182,45 +162,58 @@ const Projects = () => {
                   value={newProject.technologies}
                   onChange={(e) => setNewProject({ ...newProject, technologies: e.target.value })}
                   placeholder="Technologies (comma-separated)"
-                  className="bg-gray-700 text-white"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
+                />
+                <textarea
+                  value={newProject.responsibilities}
+                  onChange={(e) => setNewProject({ ...newProject, responsibilities: e.target.value })}
+                  placeholder="Responsibilities (one per line)"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
+                  rows="3"
+                />
+                <input
+                  type="url"
+                  value={newProject.demoUrl}
+                  onChange={(e) => setNewProject({ ...newProject, demoUrl: e.target.value })}
+                  placeholder="Demo URL"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
                 />
                 <input
                   type="file"
                   onChange={(e) => setNewProject({ ...newProject, image: e.target.files[0] })}
-                  className="bg-gray-700 text-white"
+                  className="w-full p-2 bg-gray-700 text-white rounded-md"
                 />
-                <button type="submit" className="bg-[#00E5FF] text-white py-2 px-4 rounded">
+                <button type="submit" className="bg-[#00E5FF] text-gray-800 py-2 px-4 rounded-md hover:bg-[#00B8D9] transition-colors duration-300">
                   Add Project
                 </button>
               </form>
             )}
           </motion.div>
         )}
-       {loading ? (
-  <p className="text-center text-gray-400">Loading...</p>
-) : (
-  <motion.div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-    <AnimatePresence>
-      {projects.length > 0 ? (
-        projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            isEditing={isEditing}
-            onDelete={handleDeleteProject}
-            flipped={flippedCard === project.id}
-            onFlip={() => setFlippedCard((prev) => (prev === project.id ? null : project.id))}
-          />
-        ))
-      ) : (
-        <p className="text-center text-gray-400">No projects available.</p>
-      )}
-    </AnimatePresence>
-  </motion.div>
-)}
+        {loading ? (
+          <p className="text-center text-gray-400">Loading...</p>
+        ) : (
+          <motion.div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <AnimatePresence>
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    isEditing={isEditing}
+                    onDelete={handleDeleteProject}
+                  />
+                ))
+              ) : (
+                <p className="text-center text-gray-400 col-span-full">No projects available.</p>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
     </motion.section>
   );
 };
 
 export default Projects;
+

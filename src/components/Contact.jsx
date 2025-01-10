@@ -94,10 +94,17 @@ const Contact = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
-      className="py-20 bg-gray-900 text-white"
+      className="py-20 bg-gradient-to-br from-blue-500/10 to-purple-500/10 text-white"
     >
       <div className="container mx-auto px-6">
-        <h2 className="text-4xl font-bold mb-8 text-center text-blue-400">Contact Me</h2>
+         <motion.h2
+                  className="text-4xl font-bold mb-12 text-center text-[#00E5FF]"
+                  initial={{ y: -50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  Contact Me
+                </motion.h2>
         {isLoading ? (
           <p className="text-center text-blue-300">Loading contact information...</p>
         ) : (
