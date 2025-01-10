@@ -22,12 +22,12 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
       }}
     >
       {/* Image */}
-      <motion.div className="w-full h-48 sm:h-56 md:h-64 bg-gray-700 relative">
+      <motion.div className="w-full h-40 sm:h-56 md:h-64 bg-gray-700 relative">
         {project.image ? (
           <img
             src={project.image}
             alt={project.title}
-            className="object-cover w-full h-full transition-all duration-300"
+            className="object-contain w-full h-full transition-all duration-300"
           />
         ) : (
           <div className="flex justify-center items-center h-full bg-gray-600 text-white font-bold text-xl">
@@ -80,11 +80,16 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
         {/* Buttons */}
         <div className="flex justify-between items-center mt-4">
           <button
-            className="flex items-center text-[#00E5FF] hover:text-[#00B8D9] transition-colors duration-300"
+            className={`flex items-center ${project.demoUrl ? "text-[#00E5FF]" : "text-red-400"} hover:text-[#00B8D9] transition-colors duration-300`}
             onClick={() => window.open(project.demoUrl || `/${project.id}`, "_blank")}
           >
-            <ExternalLink className="mr-2" />
-            Visit
+            {
+              project.demoUrl ?
+                <>
+                  <ExternalLink className="mr-2" />
+                  Visit
+                </> : "No Visit"
+            }
           </button>
 
           {isEditing && (

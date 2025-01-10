@@ -230,6 +230,7 @@ const Header = () => {
           </>
         ) : <motion.li variants={navItemVariants}>
         <Link
+        onClick={setIsMobileMenuOpen(false)}
           to="/admin"
           className="text-white hover:text-[#00E5FF] transition-colors duration-300"
         >
