@@ -227,7 +227,14 @@ const Header = () => {
               </button>
             </motion.li>
           </>
-        ) : null}
+        ) : <motion.li variants={navItemVariants}>
+        <Link
+          to="/admin"
+          className="text-white hover:text-[#00E5FF] transition-colors duration-300"
+        >
+          Sign In
+        </Link>
+      </motion.li>}
         {/* Add Social Icons */}
         <motion.li whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
           <a
