@@ -161,10 +161,10 @@ const Header = () => {
         {/* Mobile Menu Button */}
         <motion.button
           className="md:hidden text-white"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onClick={() => setIsMobileMenuOpen(true)}
           whileTap={{ scale: 0.95 }}
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+           <Menu size={24} />
         </motion.button>
       </nav>
 
