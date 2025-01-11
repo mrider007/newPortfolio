@@ -38,7 +38,7 @@ function App() {
                       animate="animate"
                       exit="exit"
                       variants={pageVariants}
-                      transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
                     >
                       <Hero />
                       <Skills />
