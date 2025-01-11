@@ -46,10 +46,6 @@ html {
   scroll-behavior: smooth;
 }
 
-*:focus {
-  outline: 2px solid #60a5fa;
-  outline-offset: 2px;
-}
 
 
 

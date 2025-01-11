@@ -218,38 +218,48 @@ export default function Hero() {
     initial={{ boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)' }}
     className="absolute w-16 h-16 rounded-full bg-white shadow-lg overflow-hidden z-9"
     style={{
-      top: `${10 + Math.random() * 60}vh`, 
+      top: `${10 + Math.random() * 60}vh`,
       left: `${10 + Math.random() * 60}vw`,
-      opacity: 0.3,
+      opacity: 0.6, // Increased opacity for better visibility
     }}
     animate={{
       x: [
-        0, 
-        Math.random() * window.innerWidth * 0.3 - (window.innerWidth * 0.15), 
+        0,
+        Math.random() * window.innerWidth * 0.3 - (window.innerWidth * 0.15),
         0
       ],
       y: [
         0,
-        Math.random() * window.innerHeight * 0.3 - (window.innerHeight * 0.15), 
+        Math.random() * window.innerHeight * 0.3 - (window.innerHeight * 0.15),
         0
       ],
-      rotate: [0, 360, 0], 
+      rotateX: [0, Math.random() * 360, 0], // 3D rotation on X-axis
+      rotateY: [0, Math.random() * 360, 0], // 3D rotation on Y-axis
+      rotateZ: [0, Math.random() * 360, 0], // 3D rotation on Z-axis
     }}
     transition={{
       duration: 6 + index * 0.5,
-      repeat: Infinity, 
+      repeat: Infinity,
       repeatType: 'mirror',
-      delay: index * 0.4, 
+      delay: index * 0.4,
       ease: 'easeInOut',
     }}
   >
-    <img
-      src={skill.image || '/fallback-image.png'}
-      alt={skill.name || 'Skill'}
-      className="w-full h-full object-contain"
-    />
+    <div
+      className="w-full h-full flex justify-center items-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full overflow-hidden"
+      style={{
+        transform: 'perspective(400px) rotateX(30deg) rotateY(30deg)', // Add 3D effect
+      }}
+    >
+      <img
+        src={skill.image || '/fallback-image.png'}
+        alt={skill.name || 'Skill'}
+        className="w-full h-full object-cover rounded-full"
+      />
+    </div>
   </motion.div>
 ))}
+
 
 
 
