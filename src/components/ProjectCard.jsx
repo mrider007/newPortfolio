@@ -81,7 +81,7 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
         <div className="flex justify-between items-center mt-4">
           <button
             className={`flex items-center ${project.demoUrl ? "text-[#00E5FF]" : "text-red-400"} hover:text-[#00B8D9] transition-colors duration-300`}
-            onClick={() => window.open(project.demoUrl || `/${project.id}`, "_blank")}
+            onClick={project.demoUrl ? () => window.open(project.demoUrl || `/${project.id}`, "_blank"):null}
           >
             {
               project.demoUrl ?
