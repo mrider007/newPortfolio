@@ -11,7 +11,7 @@ const fallbackSkills = [
   { id: 'fallback2', name: 'Node.js', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE4qaVzeEg9j60I9z2eR77MY6ilKM9l1J82A&s' },
   { id: 'fallback3', name: 'MongoDB', image: 'https://www.liblogo.com/img-logo/mo429m311-mongodb-logo-mongodb-logo-.png' },
 ];
-export default function Hero() {
+export default function  Hero() {
   const [skills, setSkills] = useState([]);
   const [heroData, setHeroData] = useState({
     name: 'Mukesh Kumar Singh',
@@ -109,14 +109,7 @@ export default function Hero() {
       />
       <div className="relative z-10 text-center px-4 max-w-4xl w-full" id='ignore-bubble'>
         {loading ? (
-          <motion.p
-            className="text-white text-2xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            Loading...
-          </motion.p>
+          <fallbackSkills/>
         ) : (
           <motion.div variants={containerVariants} className="space-y-6">
             {user && (
