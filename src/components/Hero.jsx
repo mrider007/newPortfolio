@@ -108,9 +108,7 @@ export default function  Hero() {
         transition={{ duration: 1 }}
       />
       <div className="relative z-10 text-center px-4 max-w-4xl w-full" id='ignore-bubble'>
-        {loading ? (
-          <fallbackSkills/>
-        ) : (
+
           <motion.div variants={containerVariants} className="space-y-6">
             {user && (
               <motion.button
@@ -201,7 +199,7 @@ export default function  Hero() {
               </>
             )}
           </motion.div>
-        )}
+
       </div>
 
       {/* Animated Skill Bubbles */}
