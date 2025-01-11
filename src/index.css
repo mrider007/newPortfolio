@@ -45,3 +45,17 @@
 html {
   scroll-behavior: smooth;
 }
+
+*:focus {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* Add custom selection styles */
+::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+
+

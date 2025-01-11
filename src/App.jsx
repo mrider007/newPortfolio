@@ -9,6 +9,7 @@ import Experience from './components/Experience';
 import Contact from './components/Contact';
 import Admin from './components/Admin';
 import { AuthProvider } from './contexts/AuthContext';
+import "react-datepicker/dist/react-datepicker.css"
 
 
 function App() {
