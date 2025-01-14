@@ -299,6 +299,7 @@ const Contact = () => {
                   onClick={handleMeetingScheduled}
                   className="w-full py-3 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 text-sm font-semibold"
                   disabled={isSubmitting}
+                  color="secondary"
                 >
                   {isSubmitting ? (
                     <motion.div

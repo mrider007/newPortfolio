@@ -5,6 +5,17 @@ import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 const ProjectCard = ({ project, isEditing, onDelete }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showResponsibilities, setShowResponsibilities] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showFullTitle, setShowFullTitle] = useState(false);
+
+  // Truncate text logic
+  const truncateText = (text, limit) => {
+    if (text.length <= limit) return text;
+    return `${text.substring(0, limit)}...`;
+  };
+
+  const descriptionLimit = 100; 
+  const titleLimit = 20;
 
   return (
     <motion.div
@@ -18,7 +29,7 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
         scale: 1.05,
         y: -10,
         boxShadow: '0 0 25px 5px rgba(0, 229, 255, 0.5)',
-        transition: { type: 'spring', stiffness: 300, damping: 20 }
+        transition: { type: 'spring', stiffness: 300, damping: 20 },
       }}
     >
       {/* Image */}
@@ -38,8 +49,35 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
 
       {/* Content Section */}
       <div className="p-6 relative bg-gray-800">
-        <h3 className="text-2xl font-semibold text-white mb-2">{project.title}</h3>
-        <p className="text-gray-300 text-sm mb-4">{project.description}</p>
+        {/* Title with Show More/Show Less */}
+        <p className="text-2xl font-semibold text-white mb-2">
+          {showFullTitle ? project.title : truncateText(project.title, titleLimit)}
+        <>
+        {project.title.length > titleLimit && (
+            <span
+              onClick={() => setShowFullTitle(!showFullTitle)}
+              className="ml-2 text-sm text-[#00E5FF] hover:text-[#00B8D9] transition-colors duration-300 cursor-pointer"
+            >
+              {showFullTitle ? 'Show Less' : 'Show More'}
+            </span>
+          )}
+        </>
+        </p>
+
+        {/* Description with Show More/Show Less */}
+        <p className="text-gray-300 text-sm mb-4">
+          {showFullDescription
+            ? project.description
+            : truncateText(project.description, descriptionLimit)}
+          {project.description.length > descriptionLimit && (
+            <span
+              onClick={() => setShowFullDescription(!showFullDescription)}
+              className="ml-2 text-[#00E5FF] hover:text-[#00B8D9] transition-colors duration-300 cursor-pointer"
+            >
+              {showFullDescription ? 'Show Less' : 'Show More'}
+            </span>
+          )}
+        </p>
 
         {/* Technologies */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -80,16 +118,23 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
         {/* Buttons */}
         <div className="flex justify-between items-center mt-4">
           <button
-            className={`flex items-center ${project.demoUrl ? "text-[#00E5FF]" : "text-red-400"} hover:text-[#00B8D9] transition-colors duration-300`}
-            onClick={project.demoUrl ? () => window.open(project.demoUrl || `/${project.id}`, "_blank"):null}
-          >
-            {
-              project.demoUrl ?
-                <>
-                  <ExternalLink className="mr-2" />
-                  Visit
-                </> : "No Visit"
+            className={`flex items-center ${
+              project.demoUrl ? 'text-[#00E5FF]' : 'text-red-400'
+            } hover:text-[#00B8D9] transition-colors duration-300`}
+            onClick={
+              project.demoUrl
+                ? () => window.open(project.demoUrl || `/${project.id}`, '_blank')
+                : null
             }
+          >
+            {project.demoUrl ? (
+              <>
+                <ExternalLink className="mr-2" />
+                Visit
+              </>
+            ) : (
+              'No Visit'
+            )}
           </button>
 
           {isEditing && (
@@ -107,4 +152,3 @@ const ProjectCard = ({ project, isEditing, onDelete }) => {
 };
 
 export default ProjectCard;
-
