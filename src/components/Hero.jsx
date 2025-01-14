@@ -92,6 +92,7 @@ export default function  Hero() {
       opacity: 1,
     },
   };
+  
 
 
   return (

@@ -6,7 +6,7 @@ import { db } from "../firebase"
 import toast from "react-hot-toast"
 import emailjs from "emailjs-com"
 import DatePicker from "react-datepicker"
-import { Button } from "./ui/button"
+import myUI from "."
 
 const Contact = () => {
   const { user } = useAuth()
@@ -295,7 +295,7 @@ const Contact = () => {
                 whileHover={{ scale: 1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button
+                <myUI.Button
                   onClick={handleMeetingScheduled}
                   className="w-full py-3 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 text-sm font-semibold"
                   disabled={isSubmitting}
@@ -315,7 +315,7 @@ const Contact = () => {
                   ) : (
                     "Schedule Meeting"
                   )}
-                </Button>
+                </myUI.Button>
               </motion.div>
             </motion.div>
           </div>
